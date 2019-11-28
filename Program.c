@@ -7,84 +7,116 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-
-/* Pipe denemek için örnek 2 kod
-  char* komutlar[]={"ls","less"};
-  char* girdiler[]={"-1",NULL};
-  if(Pipe(komutlar,girdiler)<0)
-  {
-    printf("pipe olusurken hata\n");
-  }
-  return 0;
-
-*/
-//Pipe için girdi ve çıktı uçlarını belirttik
 #define READ_END 0
 #define WRITE_END 1
-//Commands komutların bulunduğu bir dizi
-//Arguments commands ta sıfırıncı indikste hangi komut var ise arguments[0] da da onun parametresi olmalı
-int Pipe(char* commands[],char* arguments[]){
-  //Hiç komut girilmediyse hata veriyor
-  if(commands[0]==NULL)
-  {
-    printf("Girilen komutlar yeterli degil!");
+#define System_Call 1
+
+///Pipe icin coklu komutları kolay alabilmek icin struct yapisi
+
+struct Commands{
+  char* prosses[3];
+  int type;
+};
+
+///Path degiskenini kullanan exec fonksiyonu
+
+int Execvp(char* parameters[])
+{
+  if(execvp(parameters[0],parameters)<0){
+    perror(parameters[0]);
     return -1;
   }
-  //Fork yapmak için child id si
-  pid_t child_pid,child_pid2;
-  //pipe in girdi ve çıktı ucunu belirten dizi
+  return 0;
+}
+
+///Aynı dizindeki programları calistirmak icin exec fonksiyonu
+
+int Execv(char* parameters[]){
+  if(execv(parameters[0],parameters)<0)
+  {
+    perror(parameters[0]);
+    return -1;
+  }
+  return 0;
+}
+
+//Gerekli komutlar commands degiskenine boyle yuklenmelidir
+/*
+struct Commands commands[4];
+commands[0].prosses[0]="echo";
+commands[0].prosses[1]="12";
+commands[0].prosses[2]=NULL;
+commands[0].type=1;
+
+commands[1].prosses[0]="topla";
+commands[1].prosses[1]=NULL;
+commands[1].type=0;
+
+commands[2].prosses[0]="topla";
+commands[2].prosses[1]=NULL;
+commands[2].type=0;
+
+commands[3].prosses[0]="topla";
+commands[3].prosses[1]=NULL;
+commands[3].type=0;
+
+if(Pipe(commands,4)<0)
+{
+  printf("Pipe olusurken hata");
+}
+*/
+int Pipe(struct Commands commands[],int number){
+
   int fd[2];
-  // dizimiz üzerinde pipe oluşturuldu
-  pipe(fd);
-  //Cocuk olusturmak için fork yapıldı
-  child_pid = fork();
-  //execvp fonksiyonuna parametre vermek için listeler
-  char* values1[] = {commands[0],arguments[0],NULL};
-  char* values2[] = {commands[1],arguments[1],NULL};
-  if(child_pid<0)
-  {
-    perror("Cocuk olusurken hata!");
-    return -1;
-  }
-  else if(child_pid==0)
-  {
-    //dup2 fonksiyonu kullanılarak printf fonksiyonlarının çıktısı pipe yazıldı;
-    //dup2 yaptıktan sonra tüm printfler ilk parametresine verilen yere yazılır burada pipe in girdi ucuna yazdırıldı
-    dup2(fd[WRITE_END], STDOUT_FILENO);
-    //Bunları niye kapatıyoruz bilmiyorum
-    close(fd[READ_END]);
-    close(fd[WRITE_END]);
-    //execvp fonksiyonuna hangi komutun çalışacağı ve parame
-    if(execvp(commands[0],values1)<0){
-      perror(commands[0]);
+  pid_t pid;
+  int fdd = READ_END;
+
+  for(int i=0;i<number;i++){
+    //fd üzerinde pipe oluşturuldu
+    pipe(fd);
+    //Cocuk olusurken hata var mı diye kontrol edildi
+    if ((pid = fork()) == -1) {
+      perror("fork");
       return -1;
     }
-  }
-  else
-  {
-    child_pid2=fork();
-    if(child_pid2<0)
-    {
-      perror("Cocuk olusurken hata!");
-      return -1;
-    }
-    else if(child_pid2==0)
-    {
-      dup2(fd[READ_END], STDIN_FILENO);
-      close(fd[WRITE_END]);
+    //Cocuk icinde yapılacak şeyler buraya yazılır
+    else if (pid == 0) {
+      //Ebeveyn ile habarleşmek için
+      dup2(fdd, STDIN_FILENO);
+      //Eger son komut degilse bilgisini bir sonraki komut için yazma ucuna yazar
+      if (i != (number-1)) {
+        dup2(fd[WRITE_END], STDOUT_FILENO);
+      }
+      //Kullanılmayan pipe lar kapatılır
       close(fd[READ_END]);
-      if(execvp(commands[1],values2)<0){
-        perror(commands[1]);
+      //Eger girilmiş olan komut sistem komutu ise Execvp calistirilir
+      if(commands[i].type==System_Call)
+      {
+        if(Execvp(commands[i].prosses)<0)
         return -1;
       }
+      //Eger sistem komutu degil ise execv calisir
+      else
+      {
+        if(Execv(commands[i].prosses)<0)
+        {
+          return -1;
+        }
+      }
     }
-    else{
-      wait(&child_pid2);
+    //Ebeveyn cocukları bekler
+    else {
+      wait(NULL);
+      //Kullanılmayan uc kapatılır
+      close(fd[WRITE_END]);
+      //Cocugun yazma ucu Ebeveynin okuma ucuna esitlenir
+      fdd = fd[READ_END];
     }
-    wait(&child_pid);
   }
-  return 1;
+  return 0;
 }
+
+
 int Recognizer(char * input) {
   //printf("%s",input);
   char * pch;
