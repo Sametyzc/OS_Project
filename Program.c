@@ -1,12 +1,12 @@
 #include <stdio.h>
-#include <string.h>
 #include <unistd.h>
-#include <limits.h>
-#include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <fcntl.h>
 #include <sys/stat.h>
-
+#include <stdlib.h>
+#include <string.h>
+#include <limits.h>
 #define READ_END 0
 #define WRITE_END 1
 #define System_Call 1
@@ -62,7 +62,7 @@ commands[3].type=0;
 
 if(Pipe(commands,4)<0)
 {
-  printf("Pipe olusurken hata");
+printf("Pipe olusurken hata");
 }
 */
 int Pipe(struct Commands commands[],int number){
@@ -95,7 +95,6 @@ int Pipe(struct Commands commands[],int number){
         if(Execvp(commands[i].prosses)<0)
         return -1;
       }
-      //Eger sistem komutu degil ise execv calisir
       else
       {
         if(Execv(commands[i].prosses)<0)
@@ -116,64 +115,443 @@ int Pipe(struct Commands commands[],int number){
   return 0;
 }
 
+int Recognizer(char* input)
+{
+  char *pch, *pch2, *pch3;
+  char *programOutput[CHAR_MAX], *pipeDirection[CHAR_MAX], *temp[CHAR_MAX], *process[CHAR_MAX],
+  *parameter[CHAR_MAX];
+  ;
+  int a = 0, pipebool[CHAR_MAX] = {}, directionbool[CHAR_MAX] = {};
+  pch = strtok(input, ";");
+  while (pch != NULL)
+  {
+    pch2 = pch;
 
-int Recognizer(char * input) {
-  //printf("%s",input);
-  char * pch;
-  char programOutput[CHAR_MAX];
-  //dizinin işaretlere göre ayrılması ve pch pointerın ilk bloğu göstermes(strtok belirlenen işaretleri \0 a dönüştürür)
-  pch = strtok(input, " ;|,-");
-  //pch pointerın diğer blokları göstermesi
-  while (pch != NULL) {
-    int i = 0;
     printf("genel  :%s\n", pch);
-    //blokların ayrı ayrı incelenmesi
-    while ( * (pch) != '\0') {
-      printf("dizi  :%c\n", * pch);
-      //blokların bir diziye aktarılması
-      programOutput[i] = * (pch);
-      pch++, i++;
-      printf("1");
-      //bloktan sonra < geliyor ise  bunun öncesindeki blok alınır.
-      if ( * (pch + 1) == '<') {
-        programOutput[i] = * (pch);
-        printf("----cıktı :%s\n", programOutput);
-
+    programOutput[a] = pch;
+    while (*(pch) != '\0')
+    {
+      if (*pch == '|')
+      {
+        pipebool[a] = 1;
       }
-    }
-    //pointerın  sonraki bloğu göstermesini sağlar
-    pch = strtok(NULL, " ,.-");
+      if (*pch == '<')
+      {
+        directionbool[a] = 1;
+      }
+      if (*pch == '>')
+      {
+        directionbool[a] = 2;
+      }
 
+
+      pch++;
+    }
+
+
+    pch = strtok(NULL, ";");
+    a++;
   }
 
+  for (int i = 0; i < a; i++)
+  {
+    //////////////////////////////////////////////////////////////////////////////////////////
+    if (directionbool[i] == 1 && pipebool[i] == 1)
+    {
+      pch2 = strtok(programOutput[i], "<");
+      int j = 0;
+      while (pch2 != NULL)
+      {
+        pipeDirection[j] = pch2;
+        printf("genel 1-1  :%s\n", pch2);
+
+        pch2 = strtok(NULL, "<");
+        j++;
+      }
+      // pipeDirection[i-1]=FILE
+
+      int k = 0;
+      pch2 = strtok(pipeDirection[0], "|");
+      while (pch2 != NULL)
+      {
+        temp[k] = pch2;
+        printf("genel 1-1-a  :%s\n", pch2);
+
+
+        pch2 = strtok(NULL, "|");
+        k++;
+      }
+      for (int l = 0; l < k; l++)
+      {
+        pch2 = strtok(temp[l], " ");
+        int m = 0, counter = 0;
+        while (pch2 != NULL)
+        {
+          if (m == 0)
+          {
+            if (*(pch2) == '.' && *(pch2 + 1) == '/')
+            {
+              process[counter] = pch2 + 2;
+              printf("işlem %s        ", pch2 + 2);
+            }
+            else
+            {
+              process[counter] = pch2;
+              printf("işlem %s        ", pch2);
+            }
+          }
+          else if (m == 1)
+          {
+            parameter[counter] = pch2;
+            printf("parametresi %s\n", pch2);
+          }
+
+
+          pch2 = strtok(NULL, " ");
+          m++;
+        }
+        if (m == 1)
+        {
+          parameter[counter] = NULL;
+          printf("parametresi %s\n", parameter[counter]);
+        }
+        counter++;
+      }
+      printf("Dosyası %s", pipeDirection[j - 1]);
+    }
+    //////////////////////////////////////////////////////////////////////////////////////////
+    if (directionbool[i] == 2 && pipebool[i] == 1)
+    {
+      pch2 = strtok(programOutput[i], ">");
+      int j = 0;
+      while (pch2 != NULL)
+      {
+        pipeDirection[j] = pch2;
+        printf("genel 2-1  :%s\n", pch2);
+
+        pch2 = strtok(NULL, ">");
+        j++;
+      }
+      // pipeDirection[i-1]=FILE
+
+      int k = 0;
+      pch2 = strtok(pipeDirection[0], "|");
+      while (pch2 != NULL)
+      {
+        temp[k] = pch2;
+        printf("genel 2-1-a  :%s\n", pch2);
+
+
+        pch2 = strtok(NULL, "|");
+        k++;
+      }
+      for (int l = 0; l < k; l++)
+      {
+        pch2 = strtok(temp[l], " ");
+        int m = 0, counter = 0;
+        while (pch2 != NULL)
+        {
+          if (m == 0)
+          {
+            if (*(pch2) == '.' && *(pch2 + 1) == '/')
+            {
+              process[counter] = pch2 + 2;
+              printf("işlem %s        ", pch2 + 2);
+            }
+            else
+            {
+              process[counter] = pch2;
+              printf("işlem %s        ", pch2);
+            }
+          }
+          else if (m == 1)
+          {
+            parameter[counter] = pch2;
+            printf("parametresi %s\n", pch2);
+          }
+
+
+          pch2 = strtok(NULL, " ");
+          m++;
+        }
+        if (m == 1)
+        {
+          parameter[counter] = NULL;
+          printf("parametresi %s\n", parameter[counter]);
+        }
+        counter++;
+      }
+      printf("Dosyası %s", pipeDirection[j - 1]);
+    }
+    //////////////////////////////////////////////////////////////////////////////////////////
+    if (directionbool[i] == 1 && pipebool[i] == 0)
+    {
+      pch2 = strtok(programOutput[i], "<");
+      int j = 0;
+      while (pch2 != NULL)
+      {
+        pipeDirection[j] = pch2;
+        printf("genel 1-0  :%s\n", pch2);
+
+        pch2 = strtok(NULL, "<");
+        j++;
+      }
+      for (int l = 0; l < j - 1; l++)
+      {
+        pch2 = strtok(pipeDirection[l], " ");
+        int m = 0, counter = 0;
+        while (pch2 != NULL)
+        {
+          if (m == 0)
+          {
+            if (*(pch2) == '.' && *(pch2 + 1) == '/')
+            {
+              process[counter] = pch2 + 2;
+              printf("işlem %s        ", pch2 + 2);
+            }
+            else
+            {
+              process[counter] = pch2;
+              printf("işlem %s        ", pch2);
+            }
+          }
+          else if (m == 1)
+          {
+            parameter[counter] = pch2;
+            printf("parametresi %s\n", pch2);
+          }
+
+
+          pch2 = strtok(NULL, " ");
+          m++;
+        }
+        if (m == 1)
+        {
+          parameter[counter] = NULL;
+          printf("parametresi %s\n", parameter[counter]);
+        }
+        counter++;
+      }
+      printf("Dosyası %s", pipeDirection[j - 1]);
+    }
+    //////////////////////////////////////////////////////////////////////////////////////////
+    if (directionbool[i] == 2 && pipebool[i] == 0)
+    {
+      pch2 = strtok(programOutput[i], ">");
+      int j = 0;
+      while (pch2 != NULL)
+      {
+        pipeDirection[j] = pch2;
+        printf("genel 1-0  :%s\n", pch2);
+
+        pch2 = strtok(NULL, ">");
+        j++;
+      }
+      for (int l = 0; l < j - 1; l++)
+      {
+        pch2 = strtok(pipeDirection[l], " ");
+        int m = 0, counter = 0;
+        while (pch2 != NULL)
+        {
+          if (m == 0)
+          {
+            if (*(pch2) == '.' && *(pch2 + 1) == '/')
+            {
+              process[counter] = pch2 + 2;
+              printf("işlem %s        ", pch2 + 2);
+            }
+            else
+            {
+              process[counter] = pch2;
+              printf("işlem %s        ", pch2);
+            }
+          }
+          else if (m == 1)
+          {
+            parameter[counter] = pch2;
+            printf("parametresi %s\n", pch2);
+          }
+
+
+          pch2 = strtok(NULL, " ");
+          m++;
+        }
+        if (m == 1)
+        {
+          parameter[counter] = NULL;
+          printf("parametresi %s\n", parameter[counter]);
+        }
+        counter++;
+      }
+      printf("Dosyası %s", pipeDirection[j - 1]);
+    }
+    //////////////////////////////////////////////////////////////////////////////////////////
+    if (directionbool[i] == 0 && pipebool[i] == 0)
+    {
+      pch2 = strtok(programOutput[i], " ");
+      int m = 0, counter = 0;
+      while (pch2 != NULL)
+      {
+        if (m == 0)
+        {
+          if (*(pch2) == '.' && *(pch2 + 1) == '/')
+          {
+            process[counter] = pch2 + 2;
+            printf("işlem %s        ", pch2 + 2);
+          }
+          else
+          {
+            process[counter] = pch2;
+            printf("işlem %s        ", pch2);
+          }
+        }
+        else if (m == 1)
+        {
+          parameter[counter] = pch2;
+          printf("parametresi %s\n", pch2);
+        }
+
+
+        pch2 = strtok(NULL, " ");
+        m++;
+      }
+      if (m == 1)
+      {
+        parameter[counter] = NULL;
+        printf("parametresi %s\n", parameter[counter]);
+      }
+      counter++;
+    }
+    //////////////////////////////////////////////////////////////////////////////////////////
+    if (directionbool[i] == 0 && pipebool[i] == 1)
+    {
+      int k = 0;
+      pch2 = strtok(programOutput[i], "|");
+      while (pch2 != NULL)
+      {
+        temp[k] = pch2;
+        printf("genel 1-1-a  :%s\n", pch2);
+
+
+        pch2 = strtok(NULL, "|");
+        k++;
+      }
+
+      struct Commands commands[k];
+      for (int l = 0; l < k; l++)
+      {
+        pch2 = strtok(temp[l], " ");
+        int m = 0, counter = 0,counter2=0;
+        while (pch2 != NULL)
+        {
+          if (m == 0)
+          {
+            if (*(pch2) == '.' && *(pch2 + 1) == '/')
+            {
+              printf("%icounter2:",counter2);
+              commands[l].type=0;
+              commands[l].prosses[0]=pch2+2;
+              //  process[counter] = pch2 + 2;
+              printf("işlem %s        ", pch2 + 2);
+            }
+            else
+            {
+              commands[l].type=1;
+              commands[l].prosses[0]=pch2;
+              //process[counter] = pch2;
+              printf("işlem %s        ", pch2);
+            }
+          }
+          else if (m == 1)
+          {
+            commands[l].prosses[1]=pch2;
+            commands[l].prosses[2]=NULL;
+            //parameter[counter] = pch2;
+            printf("parametresi %s\n", pch2);
+          }
+          pch2 = strtok(NULL, " ");
+          m++;
+        }
+        if (m == 1)
+        {
+          commands[l].prosses[1]=NULL;
+          parameter[counter] = NULL;
+          printf("parametresi %s\n", parameter[counter]);
+        }
+        counter++;
+
+      }
+      if(Pipe(commands,k)<0)
+      {
+        printf("pipe olusurken hata!\n");
+      }
+      printf("işlem sayisi :%i\n", k);
+    }
+  }
 }
-int Prompt() {
+/*pch=strtok(limit[counter],"|");
+while(pch != NULL){ printf("PIPE  :%s\n", pch);
+pch = strtok(NULL, "|");}*/
+
+int Prompt()
+{
   char hostname[HOST_NAME_MAX];
   char username[LOGIN_NAME_MAX];
   char cwd[1024];
 
-  //getcwd şu anki dosyanın konumunu getirir.
-  if (getcwd(cwd, sizeof(cwd)) != NULL) {
-    //hostname ve username
+  // getcwd şu anki dosyanın konumunu getirir.x
+  if (getcwd(cwd, sizeof(cwd)) != NULL)
+  {
+    // hostname ve username
     getlogin_r(username, LOGIN_NAME_MAX);
     gethostname(hostname, HOST_NAME_MAX);
 
     printf("\033[1;36m%s@%s:\033[1;35m~%s\033[0;33m>", username, hostname, cwd);
-    //Bufferda tutulan output verileri temizlendi.   
+    // Bufferda tutulan output verileri temizlendi.
     fflush(stdout);
-
   }
   return 0;
 }
 
-int main() {
-  char input[CHAR_MAX];
-  while (1) {
+int main()
+{
+  char input[1024];
+
+  while(1)
+  {
     Prompt();
     fgets(input, sizeof input, stdin);
-
+    for(int i=0;i<1024;i++)
+    {
+      if(input[i]=='\n')
+      {
+        input[i]='\0';
+      }
+    }
     Recognizer(input);
   }
 
-  return 0;
+  /*
+  struct Commands commands[4];
+  commands[0].prosses[0]="echo";
+  commands[0].prosses[1]="12";
+  commands[0].prosses[2]=NULL;
+  commands[0].type=1;
+
+  commands[1].prosses[0]="topla";
+  commands[1].prosses[1]=NULL;
+  commands[1].type=0;
+
+  commands[2].prosses[0]="";
+  commands[2].prosses[1]=NULL;
+  commands[2].type=0;
+
+  commands[3].prosses[0]="topla";
+  commands[3].prosses[1]=NULL;
+  commands[3].type=0;
+  if(Pipe(commands,4)<0)
+  {
+  printf("pipede hata\n");
+}*/
+return 0;
 }
