@@ -181,7 +181,7 @@ int Recognizer(char* input)
     for (int i = 0; i < a; i++)
     {
         ////////////////////////////////////////////////PIPE & YONLENDIRME('<')
-        ///ICEREN//////////////////////////////////////////
+        /// ICEREN//////////////////////////////////////////
         if (directionbool[i] == 1 && pipebool[i] == 1)
         {
             // AlD1nan pointer dizinin < iEaretine gC6re bC6lC<nmesi ve her bC6lC<nen bloDun bir
@@ -222,21 +222,36 @@ int Recognizer(char* input)
                     { // "./" ile baElD1yor ise sistem komutu deDildir
                         if (*(pch2) == '.' && *(pch2 + 1) == '/')
                         {
+                            if (*(pch2 + strlen(pch2) - 1) == '&')
+                            {
+                                *(pch2 + strlen(pch2) - 1) = '\0';
+                                // sistem komutu olmayıp & ile bitme durumu(arkaplan işlemi)
+                            }
                             commands[l].type = 0;
                             commands[l].prosses[0] = pch2 + 2;
                         }
                         else
                         {
+                            if (*(pch2 + strlen(pch2) - 1) == '&')
+                            {
+                                *(pch2 + strlen(pch2) - 1) = '\0';
+                                // sistem komutu olup  & ile bitme durumu(arkaplan işlemi)
+                            }
                             commands[l].type = 1;
                             commands[l].prosses[0] = pch2;
                         }
                     }
-                    else if (m == 1)
+                    else if (m >= 1)
                     {
+                        if (*(pch2 + strlen(pch2) - 1) == '&')
+                        {
+                            *(pch2 + strlen(pch2) - 1) = '\0';
+                            // Parametrenin & ile bitme durumu
+                        }
                         commands[l].prosses[1] = pch2;
                         commands[l].prosses[2] = NULL;
                     }
-                    else if (m == 2 && *pch2 == '&')
+                    else if (*pch2 == '&')
                     {
                         // arkaplan olup olmaması =pch2;
                     }
@@ -252,7 +267,7 @@ int Recognizer(char* input)
             }
         }
         ////////////////////////////////////////////////PIPE & YONLENDIRME('>')
-        ///ICEREN//////////////////////////////////////////
+        /// ICEREN//////////////////////////////////////////
         if (directionbool[i] == 2 && pipebool[i] == 1)
         {
             pch2 = strtok(programOutput[i], ">");
@@ -286,21 +301,36 @@ int Recognizer(char* input)
                     {
                         if (*(pch2) == '.' && *(pch2 + 1) == '/')
                         {
+                            if (*(pch2 + strlen(pch2) - 1) == '&')
+                            {
+                                *(pch2 + strlen(pch2) - 1) = '\0';
+                                // sistem komutu olmayıp & ile bitme durumu(arkaplan işlemi)
+                            }
                             commands[l].type = 0;
                             commands[l].prosses[0] = pch2 + 2;
                         }
                         else
                         {
+                            if (*(pch2 + strlen(pch2) - 1) == '&')
+                            {
+                                *(pch2 + strlen(pch2) - 1) = '\0';
+                                // sistem komutu olup  & ile bitme durumu(arkaplan işlemi)
+                            }
                             commands[l].type = 1;
                             commands[l].prosses[0] = pch2;
                         }
                     }
-                    else if (m == 1)
+                    else if (m >= 1)
                     {
+                        if (*(pch2 + strlen(pch2) - 1) == '&')
+                        {
+                            *(pch2 + strlen(pch2) - 1) = '\0';
+                            // Parametrenin & ile bitme durumu
+                        }
                         commands[l].prosses[1] = pch2;
                         commands[l].prosses[2] = NULL;
                     }
-                    else if (m == 2 && *pch2 == '&')
+                    else if (*pch2 == '&')
                     {
                         // arkaplan olup olmaması =pch2;
                     }
@@ -316,7 +346,7 @@ int Recognizer(char* input)
             }
         }
         ////////////////////////////////////////////////SADECE YONLENDIRME('<')
-        ///ICEREN//////////////////////////////////////////
+        /// ICEREN//////////////////////////////////////////
         if (directionbool[i] == 1 && pipebool[i] == 0)
         {
             pch2 = strtok(programOutput[i], "<");
@@ -339,21 +369,36 @@ int Recognizer(char* input)
                     {
                         if (*(pch2) == '.' && *(pch2 + 1) == '/')
                         {
+                            if (*(pch2 + strlen(pch2) - 1) == '&')
+                            {
+                                *(pch2 + strlen(pch2) - 1) = '\0';
+                                // sistem komutu olmayıp & ile bitme durumu(arkaplan işlemi)
+                            }
                             commands[l].type = 0;
                             commands[l].prosses[0] = pch2 + 2;
                         }
                         else
                         {
+                            if (*(pch2 + strlen(pch2) - 1) == '&')
+                            {
+                                *(pch2 + strlen(pch2) - 1) = '\0';
+                                // sistem komutu olup  & ile bitme durumu(arkaplan işlemi)
+                            }
                             commands[l].type = 1;
                             commands[l].prosses[0] = pch2;
                         }
                     }
-                    else if (m == 1)
+                    else if (m >= 1)
                     {
+                        if (*(pch2 + strlen(pch2) - 1) == '&')
+                        {
+                            *(pch2 + strlen(pch2) - 1) = '\0';
+                            // Parametrenin & ile bitme durumu
+                        }
                         commands[l].prosses[1] = pch2;
                         commands[l].prosses[2] = NULL;
                     }
-                    else if (m == 2 && *pch2 == '&')
+                    else if (*pch2 == '&')
                     {
                         // arkaplan olup olmaması =pch2;
                     }
@@ -369,7 +414,7 @@ int Recognizer(char* input)
             }
         }
         ////////////////////////////////////////////////SADECE YONLENDIRME('>')
-        ///ICEREN//////////////////////////////////////////
+        /// ICEREN//////////////////////////////////////////
         if (directionbool[i] == 2 && pipebool[i] == 0)
         {
             pch2 = strtok(programOutput[i], ">");
@@ -392,21 +437,36 @@ int Recognizer(char* input)
                     {
                         if (*(pch2) == '.' && *(pch2 + 1) == '/')
                         {
+                            if (*(pch2 + strlen(pch2) - 1) == '&')
+                            {
+                                *(pch2 + strlen(pch2) - 1) = '\0';
+                                // sistem komutu olmayıp & ile bitme durumu(arkaplan işlemi)
+                            }
                             commands[l].type = 0;
                             commands[l].prosses[0] = pch2 + 2;
                         }
                         else
                         {
+                            if (*(pch2 + strlen(pch2) - 1) == '&')
+                            {
+                                *(pch2 + strlen(pch2) - 1) = '\0';
+                                // sistem komutu olup  & ile bitme durumu(arkaplan işlemi)
+                            }
                             commands[l].type = 1;
                             commands[l].prosses[0] = pch2;
                         }
                     }
-                    else if (m == 1)
+                    else if (m >= 1)
                     {
+                        if (*(pch2 + strlen(pch2) - 1) == '&')
+                        {
+                            *(pch2 + strlen(pch2) - 1) = '\0';
+                            // Parametrenin & ile bitme durumu
+                        }
                         commands[l].prosses[1] = pch2;
                         commands[l].prosses[2] = NULL;
                     }
-                    else if (m == 2 && *pch2 == '&')
+                    else if (*pch2 == '&')
                     {
                         // arkaplan olup olmaması =pch2;
                     }
@@ -422,7 +482,7 @@ int Recognizer(char* input)
             }
         }
         ////////////////////////////////////////////////PIPE VE YONLENDIRME
-        ///ICERMEYEN//////////////////////////////////////////
+        /// ICERMEYEN//////////////////////////////////////////
         if (directionbool[i] == 0 && pipebool[i] == 0)
         {
             pch2 = strtok(programOutput[i], " ");
@@ -430,28 +490,46 @@ int Recognizer(char* input)
             struct Commands command;
             while (pch2 != NULL)
             {
-                if (m == 0)
+                if (m == 0) //İlk girdiye  bakar ve her zaman bu işlem olmak zorundadır
                 {
                     if (*(pch2) == '.' && *(pch2 + 1) == '/')
                     {
+                        if (*(pch2 + strlen(pch2) - 1) == '&')
+                        {
+                            *(pch2 + strlen(pch2) - 1) = '\0';
+                            // sistem komutu olmayıp & ile bitme durumu(arkaplan işlemi)
+                        }
                         command.type = 0;
                         command.prosses[0] = pch2 + 2;
                     }
+
                     else
                     {
+                        if (*(pch2 + strlen(pch2) - 1) == '&')
+                        {
+                            *(pch2 + strlen(pch2) - 1) = '\0';
+                            // sistem komutu olup  & ile bitme durumu(arkaplan işlemi)
+                        }
                         command.type = 1;
                         command.prosses[0] = pch2;
                     }
                 }
-                else if (m == 1)
+                if (*pch2 == '&')
                 {
+                    // arkaplan olup olmaması =pch2; (yukarıdakilerden farkı &'nin  işlemden boşluk
+                    // ile ayrılmış olması )
+                }
+                if (m >= 1) // Parametrelere bakar
+                {
+                    if (*(pch2 + strlen(pch2) - 1) == '&')
+                    {
+                        *(pch2 + strlen(pch2) - 1) = '\0';
+                        // Parametrenin & ile bitme durumu
+                    }
                     command.prosses[1] = pch2;
                     command.prosses[2] = NULL;
                 }
-                else if (m == 2 && *pch2 == '&')
-                {
-                    // arkaplan olup olmaması =pch2;
-                }
+
 
                 pch2 = strtok(NULL, " ");
                 m++;
@@ -468,7 +546,7 @@ int Recognizer(char* input)
             }
         }
         /////////////////////////////////////////////////SADECE PIPE
-        ///ICERENLER/////////////////////////////////////////
+        /// ICERENLER/////////////////////////////////////////
         if (directionbool[i] == 0 && pipebool[i] == 1)
         {
             int k = 0;
@@ -491,21 +569,36 @@ int Recognizer(char* input)
                     {
                         if (*(pch2) == '.' && *(pch2 + 1) == '/')
                         {
+                            if (*(pch2 + strlen(pch2) - 1) == '&')
+                            {
+                                *(pch2 + strlen(pch2) - 1) = '\0';
+                                // sistem komutu olmayıp & ile bitme durumu(arkaplan işlemi)
+                            }
                             commands[l].type = 0;
                             commands[l].prosses[0] = pch2 + 2;
                         }
                         else
                         {
+                            if (*(pch2 + strlen(pch2) - 1) == '&')
+                            {
+                                *(pch2 + strlen(pch2) - 1) = '\0';
+                                // sistem komutu olup  & ile bitme durumu(arkaplan işlemi)
+                            }
                             commands[l].type = 1;
                             commands[l].prosses[0] = pch2;
                         }
                     }
-                    else if (m == 1)
+                    else if (m >= 1)
                     {
+                        if (*(pch2 + strlen(pch2) - 1) == '&')
+                        {
+                            *(pch2 + strlen(pch2) - 1) = '\0';
+                            // Parametrenin & ile bitme durumu
+                        }
                         commands[l].prosses[1] = pch2;
                         commands[l].prosses[2] = NULL;
                     }
-                    else if (m == 2 && *pch2 == '&')
+                    else if (*pch2 == '&')
                     {
                         // arkaplan olup olmaması =pch2;
                     }
