@@ -488,6 +488,8 @@ int Recognizer(char* input)
             pch2 = strtok(programOutput[i], " ");
             int m = 0, counter = 0;
             struct Commands command;
+		char quit[5]="quit";
+	    
             while (pch2 != NULL)
             {
                 if (m == 0) //İlk girdiye  bakar ve her zaman bu işlem olmak zorundadır
@@ -536,6 +538,8 @@ int Recognizer(char* input)
             }
             if (m == 1)
             {
+		if(strstr(input,quit)!=NULL)
+		exit(0);
                 command.prosses[1] = NULL;
             }
             counter++;
@@ -647,6 +651,7 @@ int main()
     {
         Prompt();
         fgets(input, sizeof input, stdin);
+	
         for (int i = 0; i < 1024; i++)
         {
             if (input[i] == '\n')
@@ -654,6 +659,8 @@ int main()
                 input[i] = '\0';
             }
         }
+	
+	
         // Sonsuz donguye girmesin diye hata olusur ise kontrol altina almak icin
         if (Recognizer(input) < 0)
         {
